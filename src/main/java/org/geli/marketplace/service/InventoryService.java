@@ -18,63 +18,53 @@ public class InventoryService {
     @Autowired
     private InventoryRepository inventoryDao;
 
+    public ResponseEntity<ResponseUtil> checkStock(Long variantId) {
+        ResponseUtil response = new ResponseUtil();
+        org.geli.marketplace.model.InventoryModel inventory = inventoryDao.findByVariantId(variantId)
+                .orElseThrow(() -> new java.util.NoSuchElementException("Inventory not found for Variant " + variantId));
+                
+        response.setStatus(200);
+        response.setMessage(java.util.Map.of("variantId", variantId, "stock", inventory.getQuantity()));
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     public ResponseEntity<ResponseUtil> addStock(Long variantId, int quantityToAdd) {
         ResponseUtil response = new ResponseUtil();
-        try {
-            InventoryModel inventory = inventoryDao.findByVariantId(variantId).orElse(null);
-            
-            if (inventory != null) {
-                inventory.setQuantity(inventory.getQuantity() + quantityToAdd);
-            } else {
-                inventory = new InventoryModel();
-                VariantModel variant = new VariantModel();
-                variant.setId(variantId);
-                inventory.setVariant(variant);
-                inventory.setQuantity(quantityToAdd);
-            }
-            
-            inventoryDao.save(inventory);
-            response.setStatus(200);
-            response.setMessage(inventory);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            response.setStatus(500);
-            response.setMessage(e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        org.geli.marketplace.model.InventoryModel inventory = inventoryDao.findByVariantId(variantId).orElse(null);
+        
+        if (inventory != null) {
+            inventory.setQuantity(inventory.getQuantity() + quantityToAdd);
+        } else {
+            inventory = new org.geli.marketplace.model.InventoryModel();
+            org.geli.marketplace.model.VariantModel variant = new org.geli.marketplace.model.VariantModel();
+            variant.setId(variantId);
+            inventory.setVariant(variant);
+            inventory.setQuantity(quantityToAdd);
         }
+        
+        inventoryDao.save(inventory);
+        response.setStatus(200);
+        response.setMessage(inventory);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     public ResponseEntity<ResponseUtil> add(InventoryModel request) {
         ResponseUtil response = new ResponseUtil();
-        try {
-
-            // If request.id exists (update case), set created_date to current time
-            if (request.getId() != null) {
-                request.setModifiedDate(LocalDateTime.now());
-                request.setModifiedBy("system"); // You can replace "system" with actual user info if available
-            }
-            inventoryDao.save(request);
-            response.setStatus(200);
-            response.setMessage(request);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            response.setStatus(500);
-            response.setMessage(e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        if (request.getId() != null) {
+            request.setModifiedDate(LocalDateTime.now());
+            request.setModifiedBy("system");
         }
+        inventoryDao.save(request);
+        response.setStatus(200);
+        response.setMessage(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<ResponseUtil> findAll() {
+    public ResponseEntity<ResponseUtil> findAll(org.springframework.data.jpa.domain.Specification<InventoryModel> spec, org.springframework.data.domain.Pageable pageable) {
         ResponseUtil response = new ResponseUtil();
-        try {
-            List<InventoryModel> result = inventoryDao.findAll();
-            response.setStatus(200);
-            response.setMessage(result);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            response.setStatus(500);
-            response.setMessage(e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        org.springframework.data.domain.Page<InventoryModel> result = inventoryDao.findAll(spec, pageable);
+        response.setStatus(200);
+        response.setMessage(result);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

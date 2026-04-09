@@ -19,38 +19,25 @@ public class VariantService {
 
     public ResponseEntity<ResponseUtil> add(VariantModel request) {
         ResponseUtil response = new ResponseUtil();
-        try {
 
-            if (request.getItem() != null && request.getItem().getId() != null) {
-                VariantModel existingItem = variantDao.findById(request.getItem().getId()).orElse(null);
-                if (existingItem != null) {
-                    request.setItem(existingItem.getItem());
-                }
+        if (request.getItem() != null && request.getItem().getId() != null) {
+            VariantModel existingItem = variantDao.findById(request.getItem().getId()).orElse(null);
+            if (existingItem != null) {
+                request.setItem(existingItem.getItem());
             }
-
-
-            variantDao.save(request);
-            response.setStatus(200);
-            response.setMessage(request);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            response.setStatus(500);
-            response.setMessage(e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        variantDao.save(request);
+        response.setStatus(200);
+        response.setMessage(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<ResponseUtil> findAll() {
+    public ResponseEntity<ResponseUtil> findAll(org.springframework.data.jpa.domain.Specification<VariantModel> spec, org.springframework.data.domain.Pageable pageable) {
         ResponseUtil response = new ResponseUtil();
-        try {
-            List<VariantModel> result = variantDao.findAll();
-            response.setStatus(200);
-            response.setMessage(result);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            response.setStatus(500);
-            response.setMessage(e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        org.springframework.data.domain.Page<VariantModel> result = variantDao.findAll(spec, pageable);
+        response.setStatus(200);
+        response.setMessage(result);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -1,206 +1,189 @@
 {
-	"info": {
-		"name": "Warehouse Management System API (Complete Flow)",
-		"description": "API endpoints for the Spring Boot Warehouse Management System highlighting the relational entity boundaries.",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "1. Items",
-			"item": [
-				{
-					"name": "Step 1: Add New Product (Item)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"itemName\": \"Winter Jacket\",\n    \"description\": \"Warm winter jacket\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:8888/item/api/add",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8888",
-							"path": [
-								"item",
-								"api",
-								"add"
-							]
-						}
-					}
-				},
-				{
-					"name": "Get All Items",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8888/item/api/findAll",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8888",
-							"path": [
-								"item",
-								"api",
-								"findAll"
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "2. Variants",
-			"item": [
-				{
-					"name": "Step 2: Add Variant (to Item)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"item\": {\n        \"id\": 3\n    },\n    \"sku\": \"JKT-WINT-LARGE\",\n    \"variantName\": \"Large Winter Jacket\",\n    \"price\": 89.99\n}"
-						},
-						"url": {
-							"raw": "http://localhost:8888/variant/api/add",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8888",
-							"path": [
-								"variant",
-								"api",
-								"add"
-							]
-						}
-					}
-				},
-				{
-					"name": "Get All Variants",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8888/variant/api/findAll",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8888",
-							"path": [
-								"variant",
-								"api",
-								"findAll"
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "3. Inventory",
-			"item": [
-				{
-					"name": "Step 3: Add Stock for Variant",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"variant\": {\n        \"id\": 3\n    },\n    \"quantity\": 50,\n    \"version\": 0\n}"
-						},
-						"url": {
-							"raw": "http://localhost:8888/inventory/api/add",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8888",
-							"path": [
-								"inventory",
-								"api",
-								"add"
-							]
-						}
-					}
-				},
-				{
-					"name": "Get All Inventory Records",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8888/inventory/api/findAll",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8888",
-							"path": [
-								"inventory",
-								"api",
-								"findAll"
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "4. Checkout",
-			"item": [
-				{
-					"name": "Step 4: Sell/Checkout Variant",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8888/checkout/api/sell?variantId=3&quantity=1",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8888",
-							"path": [
-								"checkout",
-								"api",
-								"sell"
-							],
-							"query": [
-								{
-									"key": "variantId",
-									"value": "3"
-								},
-								{
-									"key": "quantity",
-									"value": "1"
-								}
-							]
-						}
-					}
-				}
-			]
-		}
-	]
+    "info": {
+        "name": "Advanced Warehouse Management API",
+        "description": "Complete collection for Marketplace Test including dynamic specifications, pagination, dynamic sorting, and stock management.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Items",
+            "item": [
+                {
+                    "name": "Create Item",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"itemName\": \"Summer Boardshorts\",\n    \"description\": \"Classic 4-way stretch shorts\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8888/item/api/add",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8888",
+                            "path": ["item", "api", "add"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Items (Advanced Search & Pagination)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8888/item/api/findAll?page=0&size=5&sort=price,asc&search=shorts&minStock=0",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8888",
+                            "path": ["item", "api", "findAll"],
+                            "query": [
+                                {"key": "page", "value": "0"},
+                                {"key": "size", "value": "5"},
+                                {"key": "sort", "value": "price,asc", "description": "Sorts by total stock natively!"},
+                                {"key": "search", "value": "shorts"},
+                                {"key": "minStock", "value": "0"},
+                                {"key": "startDate", "value": "2024-01-01", "disabled": true}
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Variants",
+            "item": [
+                {
+                    "name": "Create Variant",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"item\": {\n        \"id\": 1\n    },\n    \"sku\": \"SHORTS-BLU-M\",\n    \"variantName\": \"Blue Medium\",\n    \"price\": 34.00\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8888/variant/api/add",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8888",
+                            "path": ["variant", "api", "add"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Variants (Advanced Search & Pagination)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8888/variant/api/findAll?page=0&size=10&minPrice=10&maxPrice=100&sort=stock,desc",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8888",
+                            "path": ["variant", "api", "findAll"],
+                            "query": [
+                                {"key": "page", "value": "0"},
+                                {"key": "size", "value": "10"},
+                                {"key": "minPrice", "value": "10"},
+                                {"key": "maxPrice", "value": "100"},
+                                {"key": "minStock", "value": "1", "disabled": true},
+                                {"key": "sort", "value": "stock,desc", "description": "Sorts natively by formula totalStock"}
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Inventory",
+            "item": [
+                {
+                    "name": "Smart Add Stock (Upsert)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8888/inventory/api/addStock?variantId=1&quantity=50",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8888",
+                            "path": ["inventory", "api", "addStock"],
+                            "query": [
+                                {"key": "variantId", "value": "1"},
+                                {"key": "quantity", "value": "50"}
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Check Stock for Specific Variant",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8888/inventory/api/check/1",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8888",
+                            "path": ["inventory", "api", "check", "1"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Inventories (Advanced Search)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8888/inventory/api/findAll?page=0&size=10&minStock=10&sort=stock,asc",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8888",
+                            "path": ["inventory", "api", "findAll"],
+                            "query": [
+                                {"key": "page", "value": "0"},
+                                {"key": "size", "value": "10"},
+                                {"key": "minStock", "value": "10"},
+                                {"key": "sort", "value": "stock,asc"}
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4. Checkout",
+            "item": [
+                {
+                    "name": "Sell/Checkout Variant (Test Over-Selling)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8888/checkout/api/sell?variantId=1&quantity=2",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "8888",
+                            "path": ["checkout", "api", "sell"],
+                            "query": [
+                                {"key": "variantId", "value": "1"},
+                                {"key": "quantity", "value": "2"}
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
 }

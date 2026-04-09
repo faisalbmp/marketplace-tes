@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
 
+import org.hibernate.annotations.Formula;
+
 @Getter
 @Setter
 @Entity
@@ -29,4 +31,7 @@ public class VariantModel extends AuditModel {
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;
+
+    @Formula("(SELECT COALESCE(inv.quantity, 0) FROM inventory inv WHERE inv.variant_id = id)")
+    private Integer totalStock;
 }

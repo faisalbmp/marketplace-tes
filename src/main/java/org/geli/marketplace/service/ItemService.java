@@ -18,29 +18,17 @@ public class ItemService {
 
     public ResponseEntity<ResponseUtil> add(ItemModel request) {
         ResponseUtil response = new ResponseUtil();
-        try {
-            itemDao.save(request);
-            response.setStatus(200);
-            response.setMessage(request);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            response.setStatus(500);
-            response.setMessage(e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        itemDao.save(request);
+        response.setStatus(200);
+        response.setMessage(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<ResponseUtil> findAll() {
+    public ResponseEntity<ResponseUtil> findAll(org.springframework.data.jpa.domain.Specification<ItemModel> spec, org.springframework.data.domain.Pageable pageable) {
         ResponseUtil response = new ResponseUtil();
-        try {
-            List<ItemModel> result = itemDao.findAll();
-            response.setStatus(200);
-            response.setMessage(result);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            response.setStatus(500);
-            response.setMessage(e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        org.springframework.data.domain.Page<ItemModel> result = itemDao.findAll(spec, pageable);
+        response.setStatus(200);
+        response.setMessage(result);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
