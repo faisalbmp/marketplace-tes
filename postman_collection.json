@@ -1,0 +1,206 @@
+{
+	"info": {
+		"name": "Warehouse Management System API (Complete Flow)",
+		"description": "API endpoints for the Spring Boot Warehouse Management System highlighting the relational entity boundaries.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Items",
+			"item": [
+				{
+					"name": "Step 1: Add New Product (Item)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"itemName\": \"Winter Jacket\",\n    \"description\": \"Warm winter jacket\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8888/item/api/add",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"item",
+								"api",
+								"add"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/item/api/findAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"item",
+								"api",
+								"findAll"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Variants",
+			"item": [
+				{
+					"name": "Step 2: Add Variant (to Item)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"item\": {\n        \"id\": 3\n    },\n    \"sku\": \"JKT-WINT-LARGE\",\n    \"variantName\": \"Large Winter Jacket\",\n    \"price\": 89.99\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8888/variant/api/add",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"variant",
+								"api",
+								"add"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Variants",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/variant/api/findAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"variant",
+								"api",
+								"findAll"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Inventory",
+			"item": [
+				{
+					"name": "Step 3: Add Stock for Variant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"variant\": {\n        \"id\": 3\n    },\n    \"quantity\": 50,\n    \"version\": 0\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8888/inventory/api/add",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"inventory",
+								"api",
+								"add"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Inventory Records",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/inventory/api/findAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"inventory",
+								"api",
+								"findAll"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Checkout",
+			"item": [
+				{
+					"name": "Step 4: Sell/Checkout Variant",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/checkout/api/sell?variantId=3&quantity=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"checkout",
+								"api",
+								"sell"
+							],
+							"query": [
+								{
+									"key": "variantId",
+									"value": "3"
+								},
+								{
+									"key": "quantity",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

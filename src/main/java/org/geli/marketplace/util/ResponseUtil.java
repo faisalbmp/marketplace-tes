@@ -1,4 +1,4 @@
-package org.book.util;
+package org.geli.marketplace.util;
 
 import lombok.Getter;
 import lombok.Setter;
