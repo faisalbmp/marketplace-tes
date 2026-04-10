@@ -16,12 +16,23 @@ public class ItemService {
     @Autowired
     private ItemRepository itemDao;
 
+    @Autowired
+    private ActivityLogService activityLogService;
+
     public ResponseEntity<ResponseUtil> add(ItemModel request) {
         ResponseUtil response = new ResponseUtil();
-        itemDao.save(request);
-        response.setStatus(200);
-        response.setMessage(request);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        try {
+            itemDao.save(request);
+            response.setStatus(200);
+            response.setMessage(request);
+
+            activityLogService.log("ITEM_CREATE", "SUCCESS", "Created/Updated item", request.getId(), "items", request, response);
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            activityLogService.log("ITEM_CREATE", "ERROR", e.getMessage(), request.getId(), "items", request, null);
+            throw e;
+        }
     }
 
     public ResponseEntity<ResponseUtil> findAll(org.springframework.data.jpa.domain.Specification<ItemModel> spec, org.springframework.data.domain.Pageable pageable) {

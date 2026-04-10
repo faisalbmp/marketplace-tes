@@ -1,45 +1,114 @@
-# Marketplace Warehouse Management API
+# Shop Warehouse Management System
 
-This is a Spring Boot application designed to manage a robust Shop Warehouse system. It features complete CRUD operations for Items, Variants, and their associated Inventory, alongside advanced architectural patterns to ensure high performance and data integrity under load.
+A robust, thread-safe Spring Boot application engineered to reliably manage inventory logistics and catalog models securely for high-traffic environments. 
 
 ## 🛠 Prerequisites
-
 - **Java 25** (or compatible modern JDK).
 - **Maven**
-- **IDE** (VS Code, IntelliJ IDEA) with Spring Boot tools.
-- **Postman** (For testing endpoints using the provided collection).
+- **IDE** (VS Code, IntelliJ IDEA) or CLI.
+- **Postman** (Optional, to use the provided `postman_collection.json`).
 
-## 🚀 Getting Started
+## 🚀 How to Run the Application
 
-### 1. Build and Run
-You can launch the application directly from your terminal using Maven:
+The project utilizes an embedded **H2 In-Memory Database** making setup extremely simple—no external SQL installation or ports are required.
+
+1. **Clone the repository.**
+2. **Open a terminal in the root directory.**
+3. **Build and start the application:**
 ```bash
 mvn clean install
 mvn spring-boot:run
 ```
-*(Alternatively, you can just click **"Debug"** or **"Run"** above the `main` method in `org.geli.marketplace.Main.java` within your IDE).*
 
-By default, the server will start on port `8888`.
+By default, the server will expose itself on port `8888`.
 
-### 2. Database & Data Seeding
-The application utilizes an **H2 In-Memory Database**. 
-- It is globally transient; restarting the app provides a completely clean slate.
-- Upon startup, Spring Boot automatically executes `src/main/resources/data.sql` to inject standard mock data (Items, Variants, and seeded Inventory Stock) so you can immediately begin querying.
+### 📊 Accessing the Database Console (H2)
+Since the project uses an in-memory database, you can view the live tables and the new activity logs via the H2 Web Console:
+1. **URL**: `http://localhost:8888/h2-console`
+2. **JDBC URL**: `jdbc:h2:mem:testdb`
+3. **User Name**: `sa`
+4. **Password**: `password`
+5. Click **Connect** to access the web interface.
 
-## 🧪 Testing the API
+> [!NOTE]
+> **Sample Data Seeding:** Upon boot, Spring Boot executes `src/main/resources/data.sql` to inject robust mock data instantly. You will have a fully stocked catalog available immediately after launch, completely ready for Postman querying or manual testing!
 
-A completely pre-configured **Postman Collection** is included in the root directory: `postman_collection.json`.
+---
 
-1. Open **Postman**.
-2. Click **Import** > **File** and select `postman_collection.json`.
-3. You will see a folder structure detailing **Items**, **Variants**, **Inventory**, and **Checkout**.
+## 🏛 Design Decisions & Why
 
-### Advanced Features to Test
-We have baked significant architectural complexity into simply-consumed endpoints:
+1. **Strict Concurrency Protection (Optimistic Locking)**
+   - **Problem:** E-commerce systems are highly vulnerable to race conditions (two people buying the last item at exactly the same millisecond, permanently overselling stock). 
+   - **Decision:** Implemented JPA's `@Version` tracking directly on the `InventoryModel`.
+   - **Why:** Whenever stock is deducted via the Checkout API, Hibernate compares the version footprint atomically. If a race condition fires, it safely halts with a managed `409 Conflict` rather than irreversibly corrupting your database.
 
-- **Global Exception Handling:** We use a centralized `@RestControllerAdvice` engine. If you intentionally fire an invalid request (e.g., selling 0 variants, or hitting a variant ID that doesn't exist), you will instantly see beautifully formatted `400 Bad Request` or `404 Not Found` JSON payloads mapping exact reasons for failure!
-- **Optimistic Locking (Concurrency):** Test the `Checkout` endpoint by simulating multiple rapid calls to deduct stock. The underlying JPA `@Version` tokens will safely catch race conditions and return a `409 Conflict`.
-- **Advanced Filtering (`JpaSpecificationExecutor`):** Look into the `findAll` folders in Postman. You can rigorously query the system:
-  - Add query params like `&search=shorts`, `&minPrice=10`, `&maxPrice=100`, or date structures like `&startDate=2024-01-01`.
-- **Dynamic Relational Sorting:** If you pass `&sort=price,asc` onto the `Items` endpoint, the API smartly intercepts it and delegates it to a Hibernate `@Formula` to dynamically sub-query, sum up child inventory quantities, and natively sort the response by `totalStock`!
+2. **Detailed Activity Logging (Audit Trail)**
+   - **Problem:** In a production warehouse environment, knowing *who* changed *what* (and why a transaction failed) is critical for debugging and security.
+   - **Decision:** Developed an asynchronous-style `ActivityLogService` utilizing `REQUIRES_NEW` propagation.
+   - **Why:** Every major API interaction (Checkout, Stock Update, Item Creation) is recorded with:
+     - **Request Data**: Full JSON capture of user inputs.
+     - **Response Data**: Full JSON capture of the web response.
+     - **Table Context**: The exact table modified (e.g., `inventory`, `items`, `variants`).
+     - **Error Capture**: Status is automatically set to `ERROR` if an exception occurs, storing the stack trace details for review.
 
+3. **Global Exception Handling Engine**
+   - **Problem:** Scattered `try-catch` blocks across numerous domains are a maintainability flaw.
+   - **Decision:** Built a centralized `@RestControllerAdvice` (`GlobalExceptionHandler`). 
+   - **Why:** The codebase logic remains flawlessly pristine; exceptions natively bubble up and are securely caught and formatted into standard JSON payloads (`400 Bad Request`, `404 Not Found`, etc.) mapped universally.
+
+3. **High-Performance Filtering (`JpaSpecificationExecutor`) & Formulas**
+   - **Decision:** Replaced rigid `@Query` syntax with dynamic JPA Specifications, paired closely with `@Formula`.
+   - **Why:** Instead of calculating Total Stock across Items using heavy Java memory iteration, Hibernate's formula physically injects subqueries into the root SQL queries. This allows dynamic filtering (e.g., `?minStock=5&sort=totalStock,desc`) with extreme pagination speeds using minimal memory overhead.
+
+---
+
+## 🤔 Assumptions Made
+
+1. **Variant-to-Inventory Mapping:** The system architecture currently assumes an exact 1-to-1 relationship between a `Variant` (e.g., "Red Large T-Shirt") and its `Inventory` tracking entry for simplicity in scoping warehouse deductions.
+2. **Sorting Translations:** Specifically for `Item` queries, it was assumed that if a user requests a generic sort operation based on "price" parameters, logically they wish to sort by the Item's total aggregated catalog stock (`totalStock`).
+3. **Database Permanence:** Given the scope of rapid functional testing, it is assumed the embedded H2 instance is ideal. Any schema updates are recreated gracefully every restart ensuring an immutable test baseline. 
+
+---
+
+## 🔌 API Endpoint Examples
+
+A complete workspace collection is available inside `postman_collection.json`, but here are manual curl equivalents!
+
+### 1. Advanced Catalog Search (GET)
+Filters natively across relationships for variants matching specific parameters!
+```bash
+curl -X GET "http://localhost:8888/variant/api/findAll?search=Red&minPrice=10&maxPrice=100&sort=stock,desc&page=0&size=5"
+```
+```json
+{
+  "content": [
+    {
+      "id": 1,
+      "sku": "SHIRT-RED-L",
+      "variantName": "Red T-Shirt Size L",
+      "price": 19.99,
+      "totalStock": 10
+    }
+  ],
+  "pageable": { ... },
+  "totalElements": 1
+}
+```
+
+### 2. Live Inventory Checkout (POST)
+Attempts to purchase an item, handling validation, relational constraints, and dynamic optimistic locking simultaneously!
+```bash
+curl -X POST "http://localhost:8888/checkout/api/sell?variantId=1&quantity=2"
+```
+```json
+{
+    "status": 200,
+    "message": "Successfully sold 2 items."
+}
+```
+
+### 3. Smart Inventory Upsert (POST)
+Bypasses manual duplication checking by internally updating existing bucket quantities, or creating brand new variant relations depending on presence. 
+```bash
+curl -X POST "http://localhost:8888/inventory/api/addStock?variantId=1&quantity=50"
+```
